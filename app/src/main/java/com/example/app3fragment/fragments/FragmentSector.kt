@@ -80,6 +80,8 @@ class FragmentSector : Fragment() {
     class LocalMenuProvider(private val adapter: SectorAdapter, private val activity: AppCompatActivity, private val context: Context, private val sectorViewModel: SectorViewModel) : MenuProvider {
         override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
             menuInflater.inflate(R.menu.main_menu, menu)
+            val entryItem = menu.findItem(R.id.menu_phone)
+            entryItem.setVisible(false)
         }
 
         override fun onMenuItemSelected(menuItem: MenuItem): Boolean {

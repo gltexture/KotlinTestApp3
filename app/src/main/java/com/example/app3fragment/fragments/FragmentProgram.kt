@@ -1,8 +1,12 @@
 package com.example.app3fragment.fragments
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -16,6 +20,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.core.content.ContextCompat
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
@@ -27,6 +34,8 @@ import com.example.app3fragment.database.program.Program
 import com.example.app3fragment.fragments.edit.FragmentProgramEdit
 import com.example.app3fragment.viewmodels.CompanyViewModel
 import com.example.app3fragment.viewmodels.ProgramViewModel
+import androidx.core.net.toUri
+import androidx.fragment.app.FragmentActivity
 
 private const val ARG_TITLE = "ARG_TITLE"
 private const val ARG_COMPANY_ID = "ARG_COMPANY_ID"
@@ -72,7 +81,7 @@ class FragmentProgram : Fragment() {
         toolbarTitle.text = this.title
 
         this.adapter = ProgramAdapter()
-        this.requireActivity().addMenuProvider(LocalMenuProvider(companyId, this.adapter, activity, this.requireContext(), this.programViewModel), this.viewLifecycleOwner)
+        this.requireActivity().addMenuProvider(LocalMenuProvider(this.requireActivity(), companyId, this.adapter, activity, this.requireContext(), this.programViewModel), this.viewLifecycleOwner)
 
         //============================================
 
@@ -97,7 +106,7 @@ class FragmentProgram : Fragment() {
             }
     }
 
-    class LocalMenuProvider(private val compId: Int, private val adapter: ProgramAdapter, private val activity: AppCompatActivity, private val context: Context, private val programViewModel: ProgramViewModel) :
+    class LocalMenuProvider(private val activityO: FragmentActivity, private val compId: Int, private val adapter: ProgramAdapter, private val activity: AppCompatActivity, private val context: Context, private val programViewModel: ProgramViewModel) :
         MenuProvider {
         override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
             menuInflater.inflate(R.menu.main_menu, menu)
@@ -140,8 +149,27 @@ class FragmentProgram : Fragment() {
                     }
                     true
                 }
+                R.id.menu_phone -> {
+                    if (this.adapter.selectedPosition >= 0 && this.adapter.selectedPosition < this.adapter.programs.size) {
+                        val progr = this.adapter.programs[this.adapter.selectedPosition];
+                        if (!progr.developerPhone.isEmpty()) {
+                            if (ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
+                                makePhoneCall(progr.developerPhone)
+                            } else {
+                                ActivityCompat.requestPermissions(activityO, arrayOf(Manifest.permission.CALL_PHONE), 1)
+                            }
+                        }
+                    }
+                    true
+                }
                 else -> false
             }
+        }
+
+        private fun makePhoneCall(phoneNum: String) {
+            val intent = Intent(Intent.ACTION_CALL)
+            intent.data = "tel:$phoneNum".toUri()
+            context.startActivity(intent)
         }
     }
 

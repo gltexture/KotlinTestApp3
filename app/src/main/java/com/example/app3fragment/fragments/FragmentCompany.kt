@@ -93,6 +93,8 @@ class FragmentCompany : Fragment() {
     class LocalMenuProvider(private val adapter: CompanyAdapter, private val activity: AppCompatActivity, private val context: Context, private val companyViewModel: CompanyViewModel, private val sectorId: Int) : MenuProvider {
         override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
             menuInflater.inflate(R.menu.main_menu, menu)
+            val entryItem = menu.findItem(R.id.menu_phone)
+            entryItem.setVisible(false)
         }
 
         override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
